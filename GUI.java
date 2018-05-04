@@ -201,9 +201,15 @@ public class GUI extends JPanel
                                  metroStop.get_position().height + (circleDiameter / 2) - rectHeight,
                                  rectWidth, rectHeight);
                     g2d.setStroke(new BasicStroke(brushWidth));
-                    g2d.drawString(metroStop.get_name(),
-                            metroStop.get_position().width + (circleDiameter / 2) - rectWidth + 10, // - textCenterW,
-                            metroStop.get_position().height + (circleDiameter / 2) - (rectHeight - textCenterH * 2) + 10); // - textCenterH);
+                    ArrayList<String> topics = new ArrayList<String>();
+                    int topicOffSetY = 0;
+                    for (String topic: metroStop.get_name().split("\n"))
+                    {
+                        g2d.drawString(topic,
+                                metroStop.get_position().width + (circleDiameter / 2) - rectWidth + 10, // - textCenterW,
+                                metroStop.get_position().height + (circleDiameter / 2) - (rectHeight - textCenterH * 2) + 10 + topicOffSetY); // - textCenterH);
+                        topicOffSetY += 20;
+                    }
                 }
                 g2d.setFont(new Font("TimesRoman", Font.PLAIN, 20));
                 DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
@@ -327,8 +333,10 @@ public class GUI extends JPanel
                     g2d.drawString(metroLine.get_name(), 5, 20 + metroLineNameOffset);
                     metroLineNameOffset += 25;
                 }
-                for (MetroStop metroStop : metroLine.get_intersectingStops()) {
-                    if (metroLine.get_lastStop() != null) {
+                for (MetroStop metroStop : metroLine.get_intersectingStops())
+                {
+                    if (metroLine.get_lastStop() != null && metroLine.get_lastStop().get_date().before(metroStop.get_date()))
+                    {
                         int startOffsetY = 0;
                         int endOffsetY = 0;
                         ArrayList<MetroLineDirection> outgoingSockets = metroLine.get_lastStop().get_outgoingSockets().stream().filter(entry -> entry.get_metroLine() == metroLine).collect(Collectors.toCollection(() -> new ArrayList<MetroLineDirection>()));
