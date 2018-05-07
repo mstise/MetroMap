@@ -432,65 +432,64 @@ public class GUI extends JPanel
                             MetroStop firstStop = null, secondStop = metroStop;
                             ArrayList<MetroStop> intersectingStops = new ArrayList<MetroStop>();
                             final MetroLine finalOriginalLine = originalLine;
-                            for (MetroStop stop: allMetroStops)
+                            for (MetroStop stop : allMetroStops)
                             {
                                 if (stop.get_intersectingLines().stream().filter(line -> line.get_name() == finalOriginalLine.get_name()).collect(Collectors.toCollection(() -> new ArrayList<MetroLine>())).size() != 0)
                                     intersectingStops.add(stop);
                             }
-                            for (MetroStop stop: intersectingStops)
+                            for (MetroStop stop : intersectingStops)
                             {
                                 if (firstStop == null)
                                     firstStop = stop;
                                 else if (firstStop.get_date().before(stop.get_date()) && stop.get_date().before(secondStop.get_date()))
                                     firstStop = stop;
                             }
-                            g2d.setPaint(metroLine.get_color());
-                            int arcWidth = granularityFactor / 2;
-                            int arcHeight = firstStop.get_position().height - secondStop.get_position().height;
-                            int startX = firstStop.get_position().width + circleDiameter + brushWidth / 2;
-                            int startY = firstStop.get_position().height + circleDiameter / 2 - arcHeight;
-                            int arcX = startX + (granularityFactor / 2) - (circleDiameter / 2) - arcWidth;
-                            int arcY = startY;
-                            int arcStartAngle = 0;
-                            int arcMidAngle = -90;
-                            if (arcHeight < 0)
+                            if (firstStop.get_date().before(secondStop.get_date()))
                             {
-                                arcHeight *= -1;
-                                arcStartAngle = 0;
-                                arcMidAngle = 90;
-                                arcY -= arcHeight;
-                            }
-                            int startOffSetY = 0;
-                            int endOffsetY = 0;
-                            ArrayList<MetroLineDirection> outgoingSockets = firstStop.get_outgoingSockets().stream().filter(entry -> entry.get_metroLine() == finalOriginalLine).collect(Collectors.toCollection(() -> new ArrayList<MetroLineDirection>()));
-                            if (outgoingSockets.isEmpty())
-                                outgoingSockets = firstStop.get_outgoingSockets().stream().filter(entry -> entry.get_metroLine() == metroLine).collect(Collectors.toCollection(() -> new ArrayList<MetroLineDirection>()));
-                            if (!outgoingSockets.isEmpty())
-                                startOffSetY = brushWidth * outgoingSockets.get(0).get_socketNumber();
-                            ArrayList<MetroLineDirection> incommingSockets = secondStop.get_incommingSockets().stream().filter(entry -> entry.get_metroLine() == metroLine).collect(Collectors.toCollection(() -> new ArrayList<MetroLineDirection>()));
-                            if (!incommingSockets.isEmpty())
-                                endOffsetY = brushWidth * incommingSockets.get(0).get_socketNumber();
-                            arcY += startOffSetY;
-                            arcHeight += endOffsetY;
+                                g2d.setPaint(metroLine.get_color());
+                                int arcWidth = granularityFactor / 2;
+                                int arcHeight = firstStop.get_position().height - secondStop.get_position().height;
+                                int startX = firstStop.get_position().width + circleDiameter + brushWidth / 2;
+                                int startY = firstStop.get_position().height + circleDiameter / 2 - arcHeight;
+                                int arcX = startX + (granularityFactor / 2) - (circleDiameter / 2) - arcWidth;
+                                int arcY = startY;
+                                int arcStartAngle = 0;
+                                int arcMidAngle = -90;
+                                if (arcHeight < 0) {
+                                    arcHeight *= -1;
+                                    arcStartAngle = 0;
+                                    arcMidAngle = 90;
+                                    arcY -= arcHeight;
+                                }
+                                int startOffSetY = 0;
+                                int endOffsetY = 0;
+                                ArrayList<MetroLineDirection> outgoingSockets = firstStop.get_outgoingSockets().stream().filter(entry -> entry.get_metroLine() == finalOriginalLine).collect(Collectors.toCollection(() -> new ArrayList<MetroLineDirection>()));
+                                if (outgoingSockets.isEmpty())
+                                    outgoingSockets = firstStop.get_outgoingSockets().stream().filter(entry -> entry.get_metroLine() == metroLine).collect(Collectors.toCollection(() -> new ArrayList<MetroLineDirection>()));
+                                if (!outgoingSockets.isEmpty())
+                                    startOffSetY = brushWidth * outgoingSockets.get(0).get_socketNumber();
+                                ArrayList<MetroLineDirection> incommingSockets = secondStop.get_incommingSockets().stream().filter(entry -> entry.get_metroLine() == metroLine).collect(Collectors.toCollection(() -> new ArrayList<MetroLineDirection>()));
+                                if (!incommingSockets.isEmpty())
+                                    endOffsetY = brushWidth * incommingSockets.get(0).get_socketNumber();
+                                arcY += startOffSetY;
+                                arcHeight += endOffsetY;
 
-                            g2d.drawArc(arcX, arcY, arcWidth, arcHeight, arcStartAngle, arcMidAngle);
+                                g2d.drawArc(arcX, arcY, arcWidth, arcHeight, arcStartAngle, arcMidAngle);
 
-                            arcX += arcWidth;
-                            if (arcMidAngle == 90)
-                            {
-                                arcMidAngle = 90;
-                                arcStartAngle = 180;
-                                g2d.draw(new Line2D.Float(arcX - arcWidth / 2, arcY, firstStop.get_position().width + circleDiameter, arcY));
-                                g2d.draw(new Line2D.Float(arcX + arcWidth / 2, arcY + arcHeight, secondStop.get_position().width, arcY + arcHeight));
+                                arcX += arcWidth;
+                                if (arcMidAngle == 90) {
+                                    arcMidAngle = 90;
+                                    arcStartAngle = 180;
+                                    g2d.draw(new Line2D.Float(arcX - arcWidth / 2, arcY, firstStop.get_position().width + circleDiameter, arcY));
+                                    g2d.draw(new Line2D.Float(arcX + arcWidth / 2, arcY + arcHeight, secondStop.get_position().width, arcY + arcHeight));
+                                } else {
+                                    arcMidAngle = -90;
+                                    arcStartAngle = 180;
+                                    g2d.draw(new Line2D.Float(arcX - arcWidth / 2, arcY + arcHeight, firstStop.get_position().width + circleDiameter, arcY + arcHeight));
+                                    g2d.draw(new Line2D.Float(arcX + arcWidth / 2, arcY, secondStop.get_position().width, arcY));
+                                }
+                                g2d.drawArc(arcX, arcY, arcWidth, arcHeight, arcStartAngle, arcMidAngle);
                             }
-                            else
-                            {
-                                arcMidAngle = -90;
-                                arcStartAngle = 180;
-                                g2d.draw(new Line2D.Float(arcX - arcWidth / 2, arcY + arcHeight, firstStop.get_position().width + circleDiameter, arcY + arcHeight));
-                                g2d.draw(new Line2D.Float(arcX + arcWidth / 2, arcY, secondStop.get_position().width, arcY));
-                            }
-                            g2d.drawArc(arcX, arcY, arcWidth, arcHeight, arcStartAngle, arcMidAngle);
                         }
                     }
                     metroLine.set_lastStop(metroStop);
