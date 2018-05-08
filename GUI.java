@@ -49,7 +49,7 @@ public class GUI extends JPanel
         int granularityInDays = 1;
         int distancePerGranularity = 300;
         int granularityFactor = distancePerGranularity / granularityInDays;
-        int margin = 350;
+        int margin = 550;
         int circleDiameter = 100;
 
         Graphics2D g2d = (Graphics2D) g;
@@ -190,8 +190,8 @@ public class GUI extends JPanel
                 if (metroStop.get_mouseOver())
                 {
                     g2d.setPaint(Color.WHITE);
-                    int rectWidth = 400;
-                    int rectHeight = 200;
+                    int rectWidth = margin + circleDiameter / 2;
+                    int rectHeight = 400;
                     g2d.fillRect(metroStop.get_position().width + (circleDiameter / 2) - rectWidth,
                                  metroStop.get_position().height + (circleDiameter / 2) - rectHeight,
                                  rectWidth, rectHeight);
@@ -203,12 +203,45 @@ public class GUI extends JPanel
                     g2d.setStroke(new BasicStroke(brushWidth));
                     ArrayList<String> topics = new ArrayList<String>();
                     int topicOffSetY = 0;
+                    FontMetrics metrics = g2d.getFontMetrics();
                     for (String topic: metroStop.get_name().split("\n"))
                     {
-                        g2d.drawString(topic,
-                                metroStop.get_position().width + (circleDiameter / 2) - rectWidth + 10, // - textCenterW,
-                                metroStop.get_position().height + (circleDiameter / 2) - (rectHeight - textCenterH * 2) + 10 + topicOffSetY); // - textCenterH);
-                        topicOffSetY += 20;
+                        int width = metrics.stringWidth(topic);
+                        if (width > rectWidth - 10)
+                        {
+                            boolean keepDividingTopic = true;
+                            String[] topicWords = topic.split(" ");
+                            while (keepDividingTopic)
+                            {
+                                String newTopic = "";
+                                String potentialNewTopic = "";
+                                for (int i = 0; i < topicWords.length; i++)
+                                {
+                                    if (topicWords[i] != null)
+                                        potentialNewTopic += topicWords[i] + " ";
+                                    if (metrics.stringWidth(potentialNewTopic) < rectWidth - 10)
+                                    {
+                                        newTopic = potentialNewTopic;
+                                        topicWords[i] = null;
+                                    }
+                                    else
+                                        break;
+                                }
+                                g2d.drawString(newTopic,
+                                        metroStop.get_position().width + (circleDiameter / 2) - rectWidth + 10, // - textCenterW,
+                                        metroStop.get_position().height + (circleDiameter / 2) - (rectHeight - textCenterH * 2) + 10 + topicOffSetY); // - textCenterH);
+                                topicOffSetY += 20;
+                                if (topicWords[topicWords.length - 1] == null)
+                                    keepDividingTopic = false;
+                            }
+                        }
+                        else
+                        {
+                            g2d.drawString(topic,
+                                    metroStop.get_position().width + (circleDiameter / 2) - rectWidth + 10, // - textCenterW,
+                                    metroStop.get_position().height + (circleDiameter / 2) - (rectHeight - textCenterH * 2) + 10 + topicOffSetY); // - textCenterH);
+                            topicOffSetY += 20;
+                        }
                     }
                 }
                 g2d.setFont(new Font("TimesRoman", Font.PLAIN, 20));
