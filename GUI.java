@@ -246,9 +246,34 @@ public class GUI extends JPanel
                 }
                 g2d.setFont(new Font("TimesRoman", Font.PLAIN, 20));
                 DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-                g2d.drawString(df.format(metroStop.get_date().getTime()), metroStop.get_position().width, h - 50);
+                String dayOfTheWeek = GetDayOfWeekName(metroStop.get_date());
+                g2d.drawString(dayOfTheWeek + " " + df.format(metroStop.get_date().getTime()), metroStop.get_position().width, h - 50);
             }
         }
+    }
+
+    private String GetDayOfWeekName(GregorianCalendar date)
+    {
+        DateFormat df = new SimpleDateFormat("EEEE", Locale.ENGLISH);
+        String day = df.format(date.getTime());
+        switch (day)
+        {
+            case "Monday":
+                return "Mandag";
+            case "Tuesday":
+                return "Tirsdag";
+            case "Wednesday":
+                return "Onsdag";
+            case "Thursday":
+                return "Torsdag";
+            case "Friday":
+                return "Fredag";
+            case "Saturday":
+                return "Lørdag";
+            case "Sunday":
+                return "Søndag";
+        }
+        return day;
     }
 
     private void SetSocketsForStop(MetroStop metroStop)
