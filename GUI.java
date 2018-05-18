@@ -157,23 +157,22 @@ public class GUI extends JPanel
                 {
                     int totalLines = metroStop.get_intersectingLines().size();
                     g2d.setPaint(metroLine.get_color());
-                    if (!metroLine.get_labelHasBeenDrawn())
+//                    if (!metroLine.get_labelHasBeenDrawn())
+//                    {
+                    labelOffSet += 15;
+                    int poundSignPosition = metroLine.get_name().indexOf('#');
+                    ArrayList<MetroLine> originalLines = null;
+                    if (poundSignPosition > 0)
                     {
-                        labelOffSet += 15;
-                        int poundSignPosition = metroLine.get_name().indexOf('#');
-                        ArrayList<MetroLine> originalLines = null;
-                        if (poundSignPosition > 0)
-                        {
-                            String originalLineName = metroLine.get_name().substring(0, poundSignPosition);
-                            originalLines = metroLines.stream().filter(aLine -> aLine.get_name().length() > 2 && aLine.get_name().equals(originalLineName)).collect(Collectors.toCollection(() -> new ArrayList<MetroLine>()));
-                        }
-                        MetroLine originalLine = null;
-                        if (originalLines != null && originalLines.size() != 0)
-                            originalLine = originalLines.get(0);
-                        if (originalLine == null)
-                            g2d.drawString(metroLine.get_name(), metroStop.get_position().width, metroStop.get_position().height - labelOffSet);
-                        metroLine.set_labelHasBeenDrawn(true);
+                        String originalLineName = metroLine.get_name().substring(0, poundSignPosition);
+                        originalLines = metroLines.stream().filter(aLine -> aLine.get_name().length() > 2 && aLine.get_name().equals(originalLineName)).collect(Collectors.toCollection(() -> new ArrayList<MetroLine>()));
                     }
+                    MetroLine originalLine = metroLine;
+                    if (originalLines != null && originalLines.size() != 0)
+                        originalLine = originalLines.get(0);
+//                    if (originalLine == null)
+                    g2d.drawString(originalLine.get_name(), metroStop.get_position().width, metroStop.get_position().height - labelOffSet);metroLine.set_labelHasBeenDrawn(true);
+//                    }
 
                     g2d.drawArc(metroStop.get_position().width,
                             metroStop.get_position().height,
