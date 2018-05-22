@@ -218,7 +218,7 @@ public class GUI extends JPanel
                                 {
                                     if (topicWords[i] != null)
                                         potentialNewTopic += topicWords[i] + " ";
-                                    if (metrics.stringWidth(potentialNewTopic) < rectWidth - 10)
+                                    if (metrics.stringWidth(potentialNewTopic) < rectWidth - 10 || !potentialNewTopic.trim().contains(" "))
                                     {
                                         newTopic = potentialNewTopic;
                                         topicWords[i] = null;
