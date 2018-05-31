@@ -118,6 +118,13 @@ public class MetroStop
         _mouseOver = mouseOver;
     }
 
+    private String _falseTopic;
+    public String get_falseTopic() { return _falseTopic; }
+    public void set_falseTopic(String falseTopic)
+    {
+        _falseTopic = falseTopic;
+    }
+
     public void clearSockets()
     {
         _incommingSockets = new ArrayList<MetroLineDirection>();

@@ -33,14 +33,38 @@ public class GUI extends JPanel
         int counter = 0;
         for (MetroStop stop: allMetroStops)
         {
+//            for (MetroLine line: stop.get_intersectingLines())
+//            {
+//                if (line.get_heightPosition() == 0)
+//                {
+//                    line.set_heightPosition((h / 2) - (counter * distanceBetweenLines));
+//                    if (counter > -1)
+//                        counter++;
+//                    counter *= -1;
+//                }
+//            }
             for (MetroLine line: stop.get_intersectingLines())
             {
-                if (line.get_heightPosition() == 0)
+                if (line.get_needsHeightPosition())
                 {
-                    line.set_heightPosition((h / 2) - (counter * distanceBetweenLines));
-                    if (counter > -1)
-                        counter++;
-                    counter *= -1;
+                    int possibleHeight = 0;
+                    ArrayList<Integer> possibleHeights = findPossibleHeights(line);
+                    possibleHeights = confirmPossibleHeights(line, possibleHeights);
+                    if (!possibleHeights.isEmpty())
+                        possibleHeight = possibleHeights.get(0);
+                    if (possibleHeight != 0)
+                    {
+                        line.set_heightPosition(possibleHeight);
+                        line.set_needsHeightPosition(false);
+                    }
+                    else
+                    {
+                        line.set_heightPosition((h / 2) - (counter * distanceBetweenLines));
+                        line.set_needsHeightPosition(false);
+                        if (counter > -1)
+                            counter++;
+                        counter *= -1;
+                    }
                 }
             }
         }
@@ -249,6 +273,42 @@ public class GUI extends JPanel
                 g2d.drawString(dayOfTheWeek + " " + df.format(metroStop.get_date().getTime()), metroStop.get_position().width, h - 50);
             }
         }
+    }
+
+    private ArrayList<Integer> confirmPossibleHeights(MetroLine line, ArrayList<Integer> possibleHeights)
+    {
+        ArrayList<Integer> newPossibleHeights = new ArrayList<>(possibleHeights);
+        for (MetroStop otherStop : allMetroStops)
+        {
+            MetroLine otherLine = otherStop.get_intersectingLines().get(0);
+//                        for (MetroLine otherLine : otherStop.get_intersectingLines()) {
+            for (int height: possibleHeights)
+            {
+                if (newPossibleHeights.contains(height) && otherLine.get_heightPosition() == height && !IsLine1BeforeLine2(otherLine, line))
+                {
+                    newPossibleHeights.remove(Integer.valueOf(height));
+                    break;
+                }
+            }
+//                        }
+        }
+        return newPossibleHeights;
+    }
+
+    private ArrayList<Integer> findPossibleHeights(MetroLine line)
+    {
+        ArrayList<Integer> possibleHeights = new ArrayList<Integer>();
+        for (MetroStop otherStop : allMetroStops)
+        {
+            MetroLine otherLine = otherStop.get_intersectingLines().get(0);
+//          for (MetroLine otherLine : otherStop.get_intersectingLines()) {
+            if (IsLine1BeforeLine2(otherLine, line) && otherLine.get_heightPosition() != 0)
+            {
+                possibleHeights.add(otherLine.get_heightPosition());
+            }
+//      }
+        }
+        return possibleHeights;
     }
 
     private String GetDayOfWeekName(GregorianCalendar date)
@@ -622,17 +682,17 @@ public class GUI extends JPanel
                         }
 
                         // Try to attach lines with socket number != 0 to the circle with small lines
-                        if (myLinePosition != 0)
-                        {
-                            int posValue = myLinePosition * brushWidth;
-                            if (posValue < 0)
-                                posValue *= -1;
-                            double pythagorasWidth = circleDiameter / 2 - Math.sqrt(Math.pow(circleDiameter / 2, 2) - Math.pow(posValue, 2));
-                            int lineX1 = (int)(metroLine.get_lastStop().get_position().width + circleDiameter + pythagorasWidth);
-                            int lineX2 = (int)(metroLine.get_lastStop().get_position().width + circleDiameter);
-                            int lineY = (int)(metroLine.get_lastStop().get_position().height + circleDiameter / 2 + startOffSetY);
-                            g2d.drawLine(lineX1, lineY, lineX2, lineY);
-                        }
+//                        if (myLinePosition != 0)
+//                        {
+//                            int posValue = myLinePosition * brushWidth;
+//                            if (posValue < 0)
+//                                posValue *= -1;
+//                            double pythagorasWidth = circleDiameter / 2 - Math.sqrt(Math.pow(circleDiameter / 2, 2) - Math.pow(posValue, 2));
+//                            int lineX1 = (int)(metroLine.get_lastStop().get_position().width + circleDiameter + pythagorasWidth);
+//                            int lineX2 = (int)(metroLine.get_lastStop().get_position().width + circleDiameter);
+//                            int lineY = (int)(metroLine.get_lastStop().get_position().height + circleDiameter / 2 + startOffSetY);
+//                            g2d.drawLine(lineX1, lineY, lineX2, lineY);
+//                        }
 
                         g2d.drawArc(arcX, arcY, arcWidth, arcHeight, arcStartAngle, arcMidAngle);
                         //g2d.drawRect(arcX, arcY, arcWidth, arcHeight);
@@ -671,5 +731,34 @@ public class GUI extends JPanel
             }
             metroLine.set_lastStop(null);
         }
+    }
+
+    private boolean IsLine1BeforeLine2(MetroLine line1, MetroLine line2)
+    {
+        MetroStop lastStop = null;
+        ArrayList<MetroStop> line1Stops = new ArrayList<MetroStop>();
+        ArrayList<MetroStop> line2Stops = new ArrayList<MetroStop>();
+        for (MetroStop stop: allMetroStops)
+        {
+            if (stop.get_intersectingLines().stream().filter(line -> line.get_name() == line1.get_name()).collect(Collectors.toCollection(() -> new ArrayList<MetroLine>())).size() != 0)
+                line1Stops.add(stop);
+            if (stop.get_intersectingLines().stream().filter(line -> line.get_name() == line2.get_name()).collect(Collectors.toCollection(() -> new ArrayList<MetroLine>())).size() != 0)
+                line2Stops.add(stop);
+        }
+        for (MetroStop stop: line1Stops)
+        {
+            if (lastStop == null || lastStop.get_date().before(stop.get_date()))
+                lastStop = stop;
+        }
+        MetroStop firstStop = null;
+        for (MetroStop stop: line2Stops)
+        {
+            if (firstStop == null || stop.get_date().before(firstStop.get_date()))
+                firstStop = stop;
+        }
+        if (lastStop != null && firstStop != null && lastStop.get_date().before(firstStop.get_date()))
+            return true;
+        else
+            return false;
     }
 }

@@ -15,6 +15,17 @@ public class MetroLine
         return _name;
     }
 
+
+    private boolean _needsHeightPosition = false;
+    public boolean get_needsHeightPosition()
+    {
+        return _needsHeightPosition;
+    }
+    public void set_needsHeightPosition(boolean needsHeightPosition)
+    {
+        _needsHeightPosition = needsHeightPosition;
+    }
+
     private int _heightPosition = 0;
     public int get_heightPosition()
     {

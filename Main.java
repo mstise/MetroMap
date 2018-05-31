@@ -106,6 +106,8 @@ public class Main
                     }
                     if (newMetroStop.get_intersectingLines().size() < 5)
                         newMetroStop.get_intersectingLines().add(currentLine);
+                    if (lineNumber == 1)
+                        currentLine.set_needsHeightPosition(true);
                 }
             }
             GregorianCalendar startDate = new GregorianCalendar(Calendar.getInstance().get(Calendar.YEAR) + 1, 1, 1);
